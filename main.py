@@ -1,5 +1,5 @@
 from sys import exit
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow
 from resources.screen import UiMainWindow
 
 from utils.functions import *
@@ -42,8 +42,7 @@ class Main(QMainWindow):
             error_message(self, 'Preencha a campo de link da playlist!')
             self.__textbox_playlist_link.clear()
             self.__textbox_playlist_link.setFocus()
-
-
+            return        
     
 
 if __name__ == '__main__':
