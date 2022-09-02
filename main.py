@@ -1,6 +1,9 @@
 from sys import exit
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 from resources.screen import UiMainWindow
+
+from utils.functions import *
+from utils.components import *
 
 class Main(QMainWindow):
     def __init__(self):
@@ -33,7 +36,14 @@ class Main(QMainWindow):
 
 
     def download(self):
-        pass
+        playlist_link = self.__textbox_playlist_link.text()
+
+        if is_null(playlist_link):
+            error_message(self, 'Preencha a campo de link da playlist!')
+            self.__textbox_playlist_link.clear()
+            self.__textbox_playlist_link.setFocus()
+
+
     
 
 if __name__ == '__main__':
