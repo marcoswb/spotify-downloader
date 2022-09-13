@@ -1,10 +1,7 @@
 from sys import exit
-from dotenv import load_dotenv
-from os import getenv, system
+from os import system
 from PySide6.QtWidgets import QApplication, QMainWindow
 from resources.screen import UiMainWindow
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 
 from utils.functions import *
 from utils.components import *
@@ -16,15 +13,6 @@ class Main(QMainWindow):
         self.__window.setup_ui(self)
         self.link_components()
 
-        load_dotenv()
-
-        client_id = getenv('SPOTIFY_CLIENT_ID')
-        client_secret = getenv('SPOTIFY_CLIENT_SECRET')
-
-        self.spotify_client = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
-            client_id=client_id,
-            client_secret=client_secret
-        ))
 
     
 
@@ -59,10 +47,9 @@ class Main(QMainWindow):
             self.__textbox_playlist_link.setFocus()
             return
 
-        for track in self.spotify_client.playlist_tracks(playlist_link)['items']:
-            url = track['track']['external_urls']['spotify']
-            print(url)
-            system(f"spotify_dl -l '{url}' -o {output_folder}")
+        for url_track in get_link_tracks(playlist_link):
+            print(url_track)
+            system(f"spotify_dl -l '{url_track}' -o {output_folder}")
 
         show_message(self, 'Processo Finalizado', 'FIM.')
     
