@@ -37,6 +37,7 @@ class Main(QMainWindow):
 
 
     def download(self):
+        self.__progressbar_status_download.setValue(0)
         self.__textbox_playlist_link.setText('https://open.spotify.com/playlist/321aOHCg49aXIvEk6YO6OR?si=31e517d850914f94&pt=b729683a372e97ad519b41aaf04c1f3b')
         playlist_link = self.__textbox_playlist_link.text()
         output_folder = '~/Downloads'
@@ -62,11 +63,12 @@ class Main(QMainWindow):
         self.thread.start()
 
     
-    def update_progressbar(self, data):
-        print(data)
+    def update_progressbar(self, progress_value):
+        self.__progressbar_status_download.setValue(progress_value)
 
     def finish_process(self):
         show_message(self, 'Processo Finalizado', 'FIM.')
+        self.__progressbar_status_download.setValue(100)
 
 
 if __name__ == '__main__':
