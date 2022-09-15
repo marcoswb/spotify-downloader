@@ -1,10 +1,11 @@
 from sys import exit
-from os import system
 from PySide6.QtWidgets import QApplication, QMainWindow
 from resources.screen import UiMainWindow
+from PySide6.QtCore import QThread
 
 from utils.functions import *
 from utils.components import *
+from utils.Download import Download
 
 class Main(QMainWindow):
     def __init__(self):
@@ -13,8 +14,6 @@ class Main(QMainWindow):
         self.__window.setup_ui(self)
         self.link_components()
 
-
-    
 
     def link_components(self):
         """
@@ -38,6 +37,7 @@ class Main(QMainWindow):
 
 
     def download(self):
+        self.__textbox_playlist_link.setText('https://open.spotify.com/playlist/321aOHCg49aXIvEk6YO6OR?si=31e517d850914f94&pt=b729683a372e97ad519b41aaf04c1f3b')
         playlist_link = self.__textbox_playlist_link.text()
         output_folder = '~/Downloads'
 
@@ -47,12 +47,27 @@ class Main(QMainWindow):
             self.__textbox_playlist_link.setFocus()
             return
 
-        for url_track in get_link_tracks(playlist_link):
-            print(url_track)
-            system(f"spotify_dl -l '{url_track}' -o {output_folder}")
+        self.thread = QThread()
+        self.worker = Download()
+        self.worker.init(playlist_link, output_folder)
+        
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.download_tracks)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.progress.connect(self.update_progressbar)
+        self.worker.finished.connect(self.finish_process)
+        
+        self.thread.start()
 
-        show_message(self, 'Processo Finalizado', 'FIM.')
     
+    def update_progressbar(self, data):
+        print(data)
+
+    def finish_process(self):
+        show_message(self, 'Processo Finalizado', 'FIM.')
+
 
 if __name__ == '__main__':
     app = QApplication([])
