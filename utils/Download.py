@@ -1,7 +1,6 @@
-from os import system
+from subprocess import run, DEVNULL
 import concurrent.futures
 from PySide6.QtCore import QObject, Signal
-from time import sleep
 
 from utils.functions import *
 
@@ -14,6 +13,7 @@ class Download(QObject):
         self.__output_folder = output_folder
         self.__all_tracks = get_link_tracks(self.__link)
         self.__percent_update = (100 / len(self.__all_tracks))
+        export_environment_variables()
 
 
     def download_tracks(self):
@@ -33,6 +33,5 @@ class Download(QObject):
     
 
     def download(self, link, name_track, output_folder):
-        sleep(2)
+        run([f"spotify_dl -l '{link}' -o {output_folder}"], shell=True, stdout=DEVNULL)
         return name_track
-        # system(f"spotify_dl -l '{link}' -o {output_folder}")
