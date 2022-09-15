@@ -1,5 +1,5 @@
 from sys import exit
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication, QMainWindow, QListWidgetItem
 from resources.screen import UiMainWindow
 from PySide6.QtCore import QThread
 
@@ -38,6 +38,7 @@ class Main(QMainWindow):
 
     def download(self):
         self.__progressbar_status_download.setValue(0)
+        self.__listview_downloaded_music.clear()
         self.__textbox_playlist_link.setText('https://open.spotify.com/playlist/321aOHCg49aXIvEk6YO6OR?si=31e517d850914f94&pt=b729683a372e97ad519b41aaf04c1f3b')
         playlist_link = self.__textbox_playlist_link.text()
         output_folder = '~/Downloads'
@@ -63,8 +64,11 @@ class Main(QMainWindow):
         self.thread.start()
 
     
-    def update_progressbar(self, progress_value):
-        self.__progressbar_status_download.setValue(progress_value)
+    def update_progressbar(self, status):
+        percent = status.get('percent')
+        track_name = status.get('track_name')
+        self.__progressbar_status_download.setValue(percent)
+        self.__listview_downloaded_music.insertItem(0, QListWidgetItem(track_name))
 
     def finish_process(self):
         show_message(self, 'Processo Finalizado', 'FIM.')

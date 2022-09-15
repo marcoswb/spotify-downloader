@@ -7,7 +7,7 @@ from utils.functions import *
 
 class Download(QObject):
     finished = Signal()
-    progress = Signal(int)
+    progress = Signal(dict)
 
     def init(self, link, output_folder):
         self.__link = link
@@ -25,7 +25,7 @@ class Download(QObject):
 
             for index, future in enumerate(concurrent.futures.as_completed(futures)):
                 future.result()
-                self.progress.emit(self.__percent_update * index)
+                self.progress.emit({'percent':self.__percent_update * index, 'track_name': f'teste {index}'})
 
         self.finished.emit()
     
