@@ -23,7 +23,8 @@ def get_link_tracks(playlist_link):
     all_tracks = []
     for track in spotify_client.playlist_tracks(playlist_link)['items']:
         url = track['track']['external_urls']['spotify']
-        all_tracks.append(url)
+        name = track['track']['name']
+        all_tracks.append({'url': url, 'name': name})
     
     return all_tracks
     

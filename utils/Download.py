@@ -20,16 +20,19 @@ class Download(QObject):
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
 
-            for url_track in self.__all_tracks:
-                futures.append(executor.submit(self.download, link=url_track, output_folder=self.__output_folder))
+            for track in self.__all_tracks:
+                url = track.get('url')
+                name = track.get('name')
+                futures.append(executor.submit(self.download, link=url, name_track=name, output_folder=self.__output_folder))
 
             for index, future in enumerate(concurrent.futures.as_completed(futures)):
-                future.result()
-                self.progress.emit({'percent':self.__percent_update * index, 'track_name': f'teste {index}'})
+                track_name = future.result()
+                self.progress.emit({'percent':self.__percent_update * index, 'track_name': track_name})
 
         self.finished.emit()
     
 
-    def download(self, link, output_folder):
+    def download(self, link, name_track, output_folder):
         sleep(2)
+        return name_track
         # system(f"spotify_dl -l '{link}' -o {output_folder}")
