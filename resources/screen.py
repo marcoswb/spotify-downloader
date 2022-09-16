@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QListWidget,
     QProgressBar,
     QPushButton,
+    QToolButton,
     QVBoxLayout,
     QWidget
 )
@@ -30,6 +31,22 @@ class UiMainWindow(object):
         self.textbox__playlist_link.setObjectName(u"textbox__playlist_link")
 
         self.verticalLayout_7.addWidget(self.textbox__playlist_link)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.textbox__output_folder = QLineEdit(self.centralwidget)
+        self.textbox__output_folder.setObjectName(u"textbox__output_folder")
+        self.textbox__output_folder.setReadOnly(True)
+
+        self.horizontalLayout_2.addWidget(self.textbox__output_folder)
+
+        self.button__select_output_folder = QToolButton(self.centralwidget)
+        self.button__select_output_folder.setObjectName(u"button__select_output_folder")
+
+        self.horizontalLayout_2.addWidget(self.button__select_output_folder)
+
+
+        self.verticalLayout_7.addLayout(self.horizontalLayout_2)
 
         self.listview__downloaded_music = QListWidget(self.centralwidget)
         self.listview__downloaded_music.setObjectName(u"listview__downloaded_music")
@@ -57,7 +74,9 @@ class UiMainWindow(object):
 
 
     def retranslate_ui(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", "Spotify Downloader", None))
-        self.textbox__playlist_link.setPlaceholderText(QCoreApplication.translate("MainWindow", "Informe o link da playlist", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Spotify Downloader", None))
+        self.textbox__playlist_link.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Informe o link da playlist", None))
+        self.textbox__output_folder.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Selecione a pasta de sa\u00edda", None))
+        self.button__select_output_folder.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.button__download.setText(QCoreApplication.translate("MainWindow", u"DOWNLOAD", None))
 

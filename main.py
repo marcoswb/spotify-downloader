@@ -1,5 +1,5 @@
 from sys import exit
-from PySide6.QtWidgets import QApplication, QMainWindow, QListWidgetItem
+from PySide6.QtWidgets import QApplication, QMainWindow, QListWidgetItem, QFileDialog
 from resources.screen import UiMainWindow
 from PySide6.QtCore import QThread
 
@@ -20,11 +20,14 @@ class Main(QMainWindow):
         Vincular componentes da interface
         """
         self.__textbox_playlist_link = self.__window.textbox__playlist_link
+        self.__textbox_output_folder = self.__window.textbox__output_folder
+        self.__button_select_output_folder = self.__window.button__select_output_folder
         self.__listview_downloaded_music = self.__window.listview__downloaded_music
         self.__button_download = self.__window.button__download
         self.__progressbar_status_download = self.__window.progressbar__status_download
 
         self.__button_download.clicked.connect(self.download)
+        self.__button_select_output_folder.clicked.connect(self.select_output_folder)
     
 
     def init(self):
@@ -39,14 +42,20 @@ class Main(QMainWindow):
     def download(self):
         self.__progressbar_status_download.setValue(0)
         self.__listview_downloaded_music.clear()
-        self.__textbox_playlist_link.setText('https://open.spotify.com/playlist/321aOHCg49aXIvEk6YO6OR?si=31e517d850914f94&pt=b729683a372e97ad519b41aaf04c1f3b')
+        
         playlist_link = self.__textbox_playlist_link.text()
-        output_folder = '~/Downloads'
+        output_folder = self.__textbox_output_folder.text()
 
         if is_null(playlist_link):
             error_message(self, 'Preencha a campo de link da playlist!')
             self.__textbox_playlist_link.clear()
             self.__textbox_playlist_link.setFocus()
+            return
+
+        if is_null(output_folder):
+            error_message(self, 'Preencha a campo de pasta de saída!')
+            self.__textbox_output_folder.clear()
+            self.__textbox_output_folder.setFocus()
             return
 
         self.thread = QThread()
@@ -73,6 +82,10 @@ class Main(QMainWindow):
     def finish_process(self):
         show_message(self, 'Processo Finalizado', 'FIM.')
         self.__progressbar_status_download.setValue(100)
+
+    def select_output_folder(self):
+        output_folder = str(QFileDialog.getExistingDirectory(self, 'Select Directory'))
+        self.__textbox_output_folder.setText(output_folder)
 
 
 if __name__ == '__main__':
