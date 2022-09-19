@@ -6,6 +6,7 @@ from PySide6.QtCore import QThread
 from utils.functions import *
 from utils.components import *
 from utils.Download import Download
+from models.init_db import create_tables
 
 class Main(QMainWindow):
     def __init__(self):
@@ -61,6 +62,9 @@ class Main(QMainWindow):
         self.thread = QThread()
         self.worker = Download()
         self.worker.init(playlist_link, output_folder)
+
+        if self.worker.check_existence():
+            print(question_message(self, 'Essa playlist já foi baixada uma vez, deseja somente atualizá-la?'))
         
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.download_tracks)
@@ -89,6 +93,7 @@ class Main(QMainWindow):
 
 
 if __name__ == '__main__':
+    create_tables()
     app = QApplication([])
     
     window = Main()

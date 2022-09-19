@@ -6,6 +6,7 @@ from shutil import copy
 from os import listdir
 
 from utils.functions import *
+from models.Playlist import Playlist
 
 class Download(QObject):
     finished = Signal()
@@ -50,3 +51,12 @@ class Download(QObject):
                 if file.endswith('.mp3'):
                     path_file = os.path.join(full_path, file)
                     copy(path_file, self.__output_folder)
+    
+
+    def check_existence(self):
+        result = False
+        result_query = Playlist.select().where(Playlist.link == self.__link)
+        if result_query:
+            result = True
+
+        return result
