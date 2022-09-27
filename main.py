@@ -64,7 +64,8 @@ class Main(QMainWindow):
         self.worker.init(playlist_link, output_folder)
 
         if self.worker.check_existence():
-            print(question_message(self, 'Essa playlist já foi baixada uma vez, deseja somente atualizá-la?'))
+            if question_message(self, 'Essa playlist já foi baixada uma vez, deseja somente atualizá-la?'):
+                self.worker.only_update()
         
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.download_tracks)

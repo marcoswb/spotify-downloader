@@ -1,5 +1,6 @@
 from subprocess import run, DEVNULL
 import concurrent.futures
+from time import sleep
 from PySide6.QtCore import QObject, Signal
 from tempfile import TemporaryDirectory
 from shutil import copy
@@ -7,13 +8,14 @@ from os import listdir
 
 from utils.functions import *
 from models.Playlist import Playlist
+from models.Track import Track
 
 class Download(QObject):
     finished = Signal()
     progress = Signal(dict)
 
     def init(self, link, output_folder):
-        self.__link = link
+        self.__link = clear_link(link)
         self.__output_folder = output_folder
         self.__all_tracks = get_link_tracks(self.__link)
         self.__percent_update = (100 / len(self.__all_tracks))
@@ -21,6 +23,8 @@ class Download(QObject):
 
 
     def download_tracks(self):
+        playlist_id = self.save_playlist()
+        print(playlist_id)
         temp_directory = TemporaryDirectory()
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
@@ -31,7 +35,8 @@ class Download(QObject):
                 futures.append(executor.submit(self.download, link=url, name_track=name, output_folder=temp_directory.name))
 
             for index, future in enumerate(concurrent.futures.as_completed(futures)):
-                track_name = future.result()
+                track_name, link_track = future.result()
+                self.save_track(playlist_id, track_name, link_track)
                 self.progress.emit({'percent':self.__percent_update * index, 'track_name': track_name})
 
         self.move_output_folder(temp_directory.name)
@@ -40,8 +45,9 @@ class Download(QObject):
     
 
     def download(self, link, name_track, output_folder):
-        run([f"spotify_dl -l '{link}' -o {output_folder}"], shell=True, stdout=DEVNULL)
-        return name_track
+        sleep(3)
+        # run([f"spotify_dl -l '{link}' -o {output_folder}"], shell=True, stdout=DEVNULL)
+        return name_track, link
 
 
     def move_output_folder(self, temp_directory):
@@ -60,3 +66,22 @@ class Download(QObject):
             result = True
 
         return result
+    
+
+    def save_playlist(self):
+        if not self.check_existence():
+            playlist_id = Playlist.create(name=get_playlist_name(self.__link), link=self.__link)
+        else:
+            result_query = Playlist.select().dicts().where(Playlist.link == self.__link)
+            for line in result_query:
+                playlist_id = line.get('id')
+
+        return playlist_id
+
+    
+    def save_track(self, playlist_id, name, link):
+        Track.create(playlist_id=playlist_id, name=name, link=link)
+
+
+    def only_update(self):
+        pass

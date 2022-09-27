@@ -31,6 +31,19 @@ def get_link_tracks(playlist_link):
     return all_tracks
 
 
+def get_playlist_name(playlist_link):
+    load_dotenv()
+    auth_manager = SpotifyClientCredentials()
+    credential = spotipy.Spotify(auth_manager=auth_manager)
+    user_id = getenv('SPOTIFY_USER_ID')
+
+    playlists = credential.user_playlists(user_id)
+    while playlists:
+        for index, playlist in enumerate(playlists['items']):
+            if playlist.get('external_urls').get('spotify') in playlist_link:
+                return playlist.get('name')
+
+
 def export_environment_variables():
     load_dotenv()
 
@@ -39,3 +52,8 @@ def export_environment_variables():
 
     os.environ["SPOTIPY_CLIENT_ID"] = client_id
     os.environ["SPOTIPY_CLIENT_SECRET"] = client_secret
+
+
+def clear_link(link):
+    end_position = str(link).index('si=') -1
+    return str(link)[:end_position]
