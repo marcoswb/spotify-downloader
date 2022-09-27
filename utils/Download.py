@@ -17,6 +17,7 @@ class Download(QObject):
     def init(self, link, output_folder):
         self.__link = clear_link(link)
         self.__output_folder = output_folder
+        self.__only_update = False
         self.__all_tracks = get_link_tracks(self.__link)
         self.__percent_update = (100 / len(self.__all_tracks))
         export_environment_variables()
@@ -24,15 +25,19 @@ class Download(QObject):
 
     def download_tracks(self):
         playlist_id = self.save_playlist()
-        print(playlist_id)
         temp_directory = TemporaryDirectory()
+
+        if not self.__only_update:
+            Track.delete().execute()
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
 
             for track in self.__all_tracks:
                 url = track.get('url')
                 name = track.get('name')
-                futures.append(executor.submit(self.download, link=url, name_track=name, output_folder=temp_directory.name))
+                if not self.exist_track(playlist_id, name, url):
+                    futures.append(executor.submit(self.download, link=url, name_track=name, output_folder=temp_directory.name))
 
             for index, future in enumerate(concurrent.futures.as_completed(futures)):
                 track_name, link_track = future.result()
@@ -45,8 +50,7 @@ class Download(QObject):
     
 
     def download(self, link, name_track, output_folder):
-        sleep(3)
-        # run([f"spotify_dl -l '{link}' -o {output_folder}"], shell=True, stdout=DEVNULL)
+        run([f"spotify_dl -l '{link}' -o {output_folder}"], shell=True, stdout=DEVNULL)
         return name_track, link
 
 
@@ -84,4 +88,13 @@ class Download(QObject):
 
 
     def only_update(self):
-        pass
+        self.__only_update = True
+    
+    
+    def exist_track(self, playlist_id, name, link):
+        result = False
+        result_query = Track.select().where(Track.playlist_id == playlist_id, Track.name == name, Track.link == link)
+        if result_query:
+            result = True
+
+        return result
