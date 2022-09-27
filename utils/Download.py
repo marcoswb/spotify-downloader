@@ -1,7 +1,6 @@
 from subprocess import run, DEVNULL
 import concurrent.futures
 from time import sleep
-from PySide6.QtCore import QObject, Signal
 from tempfile import TemporaryDirectory
 from shutil import copy
 from os import listdir
@@ -10,16 +9,13 @@ from utils.functions import *
 from models.Playlist import Playlist
 from models.Track import Track
 
-class Download(QObject):
-    finished = Signal()
-    progress = Signal(dict)
+class Download():
 
     def init(self, link, output_folder):
         self.__link = clear_link(link)
         self.__output_folder = output_folder
         self.__only_update = False
         self.__all_tracks = get_link_tracks(self.__link)
-        self.__percent_update = (100 / len(self.__all_tracks))
         export_environment_variables()
 
 
@@ -42,11 +38,10 @@ class Download(QObject):
             for index, future in enumerate(concurrent.futures.as_completed(futures)):
                 track_name, link_track = future.result()
                 self.save_track(playlist_id, track_name, link_track)
-                self.progress.emit({'percent':self.__percent_update * index, 'track_name': track_name})
+                yield index+1, track_name
 
         self.move_output_folder(temp_directory.name)
         temp_directory.cleanup()
-        self.finished.emit()
     
 
     def download(self, link, name_track, output_folder):
@@ -98,3 +93,6 @@ class Download(QObject):
             result = True
 
         return result
+    
+    def get_number_tracks(self):
+        return len(self.__all_tracks)

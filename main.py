@@ -1,103 +1,44 @@
-from sys import exit
-from PySide6.QtWidgets import QApplication, QMainWindow, QListWidgetItem, QFileDialog
-from resources.screen import UiMainWindow
-from PySide6.QtCore import QThread
-
 from utils.functions import *
-from utils.components import *
 from utils.Download import Download
 from models.init_db import create_tables
 
-class Main(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.__window = UiMainWindow()
-        self.__window.setup_ui(self)
-        self.link_components()
-
-
-    def link_components(self):
-        """
-        Vincular componentes da interface
-        """
-        self.__textbox_playlist_link = self.__window.textbox__playlist_link
-        self.__textbox_output_folder = self.__window.textbox__output_folder
-        self.__button_select_output_folder = self.__window.button__select_output_folder
-        self.__listview_downloaded_music = self.__window.listview__downloaded_music
-        self.__button_download = self.__window.button__download
-        self.__progressbar_status_download = self.__window.progressbar__status_download
-
-        self.__button_download.clicked.connect(self.download)
-        self.__button_select_output_folder.clicked.connect(self.select_output_folder)
-    
+class Main():
 
     def init(self):
         """
-        Renderizar janela
+        Perguntar link da playlist e confirmar caminho de saída
         """
-        self.__listview_downloaded_music.clear()
-        self.__progressbar_status_download.setValue(0)
-        self.show()
+        while True:
+            playlist_link = input('Informe o link da playlist -> ')
+            output_folder = input('Informe a pasta de saída -> ')
+
+            if is_null(playlist_link):
+                print('Preencha a campo de link da playlist!')
+            elif is_null(output_folder):
+                print('Preencha a campo de pasta de saída!')
+            else:
+                break
+
+        self.download(playlist_link, output_folder)
 
 
-    def download(self):
-        self.__progressbar_status_download.setValue(0)
-        self.__listview_downloaded_music.clear()
-        
-        playlist_link = self.__textbox_playlist_link.text()
-        output_folder = self.__textbox_output_folder.text()
-
-        if is_null(playlist_link):
-            error_message(self, 'Preencha a campo de link da playlist!')
-            self.__textbox_playlist_link.clear()
-            self.__textbox_playlist_link.setFocus()
-            return
-
-        if is_null(output_folder):
-            error_message(self, 'Preencha a campo de pasta de saída!')
-            self.__textbox_output_folder.clear()
-            self.__textbox_output_folder.setFocus()
-            return
-
-        self.thread = QThread()
+    def download(self, playlist_link, output_folder):
         self.worker = Download()
         self.worker.init(playlist_link, output_folder)
+        number_tracks = self.worker.get_number_tracks()
 
         if self.worker.check_existence():
-            if question_message(self, 'Essa playlist já foi baixada uma vez, deseja somente atualizá-la?'):
+            response = input('Essa playlist já foi baixada uma vez, deseja somente atualizá-la? (S/N)')
+            
+            if response.upper() == 'S':
                 self.worker.only_update()
-        
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.download_tracks)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.progress.connect(self.update_progressbar)
-        self.worker.finished.connect(self.finish_process)
-        
-        self.thread.start()
 
-    
-    def update_progressbar(self, status):
-        percent = status.get('percent')
-        track_name = status.get('track_name')
-        self.__progressbar_status_download.setValue(percent)
-        self.__listview_downloaded_music.insertItem(0, QListWidgetItem(track_name))
-
-    def finish_process(self):
-        show_message(self, 'Processo Finalizado', 'FIM.')
-        self.__progressbar_status_download.setValue(100)
-
-    def select_output_folder(self):
-        output_folder = str(QFileDialog.getExistingDirectory(self, 'Select Directory'))
-        self.__textbox_output_folder.setText(output_folder)
+        for index, track in self.worker.download_tracks():
+            print(f'{index}/{number_tracks} {track} - OK')
 
 
 if __name__ == '__main__':
     create_tables()
-    app = QApplication([])
     
-    window = Main()
-    window.init()
-
-    exit(app.exec())
+    app = Main()
+    app.init()

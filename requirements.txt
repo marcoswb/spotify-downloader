@@ -1,4 +1,3 @@
 peewee==3.14.10
-PySide6==6.3.1
 spotify-dl==8.3.0
 spotipy==2.20.0
