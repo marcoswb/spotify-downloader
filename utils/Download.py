@@ -12,32 +12,31 @@ from models.Track import Track
 class Download():
 
     def init(self, link, output_folder):
+        export_environment_variables()
+
         self.__link = clear_link(link)
         self.__output_folder = output_folder
-        self.__only_update = False
         self.__all_tracks = get_link_tracks(self.__link)
-        export_environment_variables()
+        playlist_exist = self.check_existence()
+        self.__playlist_id = self.save_playlist()
+
+        return playlist_exist
 
 
     def download_tracks(self):
-        playlist_id = self.save_playlist()
         temp_directory = TemporaryDirectory()
-
-        if not self.__only_update:
-            Track.delete().execute()
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
 
             for track in self.__all_tracks:
                 url = track.get('url')
                 name = track.get('name')
-                if not self.exist_track(playlist_id, name, url):
+                if not self.exist_track(self.__playlist_id, name, url):
                     futures.append(executor.submit(self.download, link=url, name_track=name, output_folder=temp_directory.name))
 
             for index, future in enumerate(concurrent.futures.as_completed(futures)):
                 track_name, link_track = future.result()
-                self.save_track(playlist_id, track_name, link_track)
+                self.save_track(self.__playlist_id, track_name, link_track)
                 yield index+1, track_name
 
         self.move_output_folder(temp_directory.name)
@@ -82,8 +81,8 @@ class Download():
         Track.create(playlist_id=playlist_id, name=name, link=link)
 
 
-    def only_update(self):
-        self.__only_update = True
+    def download_all(self):
+        Track.delete().execute()
     
     
     def exist_track(self, playlist_id, name, link):
@@ -94,5 +93,13 @@ class Download():
 
         return result
     
+
     def get_number_tracks(self):
-        return len(self.__all_tracks)
+        result = []
+        for track in self.__all_tracks:
+            url = track.get('url')
+            name = track.get('name')
+            if not self.exist_track(self.__playlist_id, name, url):
+                result.append(track)
+
+        return len(result)
