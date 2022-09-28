@@ -2,6 +2,7 @@
 from dotenv import load_dotenv
 from os import getenv
 import os
+from os.path import isdir
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -57,3 +58,34 @@ def export_environment_variables():
 def clear_link(link):
     end_position = str(link).index('si=') -1
     return str(link)[:end_position]
+
+
+def input_user(message, limit_response=[], check_is_dir=False):
+    """
+    Perguntar algo ao usuário
+    """
+    result = ''
+    while True:
+        response = input(f'{message} => ')
+        
+        if not limit_response:
+            if is_null(response):
+                print('Digite uma resposta válida!')
+            else:
+                if check_is_dir:
+                    if not isdir(response):
+                        print('Digite um diretório válido!')
+                    else:
+                        result = str(response)
+                        break
+                else:
+                    result = str(response)
+                    break
+        else:
+            if response.upper() not in limit_response:
+                print('Digite uma resposta válida!')
+            else:
+                result = str(response).upper()
+                break
+    
+    return result
