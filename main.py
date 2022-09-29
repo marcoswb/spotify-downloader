@@ -6,7 +6,7 @@ class Main():
 
     def init(self):
         """
-        Perguntar link da playlist e confirmar caminho de saída
+        Perguntar link da playlist e iniciar download
         """
         playlist_link = input_user('Informe o link da playlist')
         output_folder = get_output_directory()
