@@ -39,5 +39,6 @@ class Main():
 if __name__ == '__main__':
     create_tables()
     
+    clean_screen()
     app = Main()
     app.init()

@@ -1,7 +1,7 @@
 
 from dotenv import load_dotenv
-from os import getenv, environ
-from os.path import isdir, isfile
+from os import getenv, environ, system
+from os.path import isdir
 import configparser
 
 import spotipy
@@ -106,3 +106,10 @@ def get_output_directory():
             config.write(configfile)
 
     return config.get('DEFAULT', 'output_directory')
+
+
+def clean_screen():
+    """
+    Limpar tela do terminal
+    """
+    system('clear')
