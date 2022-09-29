@@ -79,7 +79,7 @@ class Download():
         """
         Apaga todas as musicas já baixadas da playlist
         """
-        Track.delete().execute()
+        Track.delete().where(Track.playlist_id == self.__playlist_id).execute()
 
 
     def download_tracks(self):
