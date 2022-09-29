@@ -17,33 +17,7 @@ class Download():
         self.__all_tracks = []
 
         export_environment_variables()
-
-        if self.exists():
-            response = input_user('Essa playlist já foi baixada uma vez, deseja somente atualizá-la? (S/N)', limit_response=['S', 'N'])
-            
-            if response == 'N':
-                self.download_all()
-                
         self.load_tracks()
-     
-
-    def exists(self):
-        """
-        Checa se a playlist já foi baixada
-        """
-        result = False
-        result_query = Playlist.select().where(Playlist.link == self.__link)
-        if result_query:
-            result = True
-
-        return result
-
-
-    def download_all(self):
-        """
-        Apaga todas as musicas já baixadas da playlist
-        """
-        Track.delete().execute()
     
 
     def load_tracks(self):
@@ -66,6 +40,18 @@ class Download():
                 playlist_id = line.get('id')
 
         return playlist_id
+     
+
+    def exists(self):
+        """
+        Checa se a playlist já foi baixada
+        """
+        result = False
+        result_query = Playlist.select().where(Playlist.link == self.__link)
+        if result_query:
+            result = True
+
+        return result
 
 
     def is_updated(self):
@@ -87,6 +73,13 @@ class Download():
                 result.append(track)
 
         return len(result)
+
+
+    def download_all(self):
+        """
+        Apaga todas as musicas já baixadas da playlist
+        """
+        Track.delete().execute()
 
 
     def download_tracks(self):
