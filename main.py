@@ -18,22 +18,13 @@ class Main():
         """
         Realizar donwload das músicas
         """
-        self.worker = Download()
-        playlist_exists = self.worker.init(playlist_link, output_folder)
-
-        if playlist_exists:
-            response = input_user('Essa playlist já foi baixada uma vez, deseja somente atualizá-la? (S/N)', limit_response=['S', 'N'])
-            
-            if response == 'N':
-                self.worker.download_all()
-
-        number_tracks = self.worker.get_number_tracks()
+        self.worker = Download(playlist_link, output_folder)
         
-        if number_tracks == 0:
+        if self.worker.is_updated():
             print('Essa playlist já está atualizada!')
-
-        for index, track in self.worker.download_tracks():
-            print(f'{index}/{number_tracks} {track} - OK')
+        else:
+            for index, total_tracks, track in self.worker.download_tracks():
+                print(f'{index}/{total_tracks} {track} - OK')
 
 
 if __name__ == '__main__':
