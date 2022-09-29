@@ -9,8 +9,8 @@ class Main():
         Perguntar link da playlist e confirmar caminho de saída
         """
         playlist_link = input_user('Informe o link da playlist')
-        output_folder = input_user('Informe a pasta de saída', check_is_dir=True)
-
+        output_folder = get_output_directory()
+        
         self.download(playlist_link, output_folder)
 
 

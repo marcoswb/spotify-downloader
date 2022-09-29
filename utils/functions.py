@@ -1,8 +1,8 @@
 
 from dotenv import load_dotenv
-from os import getenv
-import os
-from os.path import isdir
+from os import getenv, environ
+from os.path import isdir, isfile
+import configparser
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -51,8 +51,8 @@ def export_environment_variables():
     client_id = getenv('SPOTIFY_CLIENT_ID')
     client_secret = getenv('SPOTIFY_CLIENT_SECRET')
 
-    os.environ["SPOTIPY_CLIENT_ID"] = client_id
-    os.environ["SPOTIPY_CLIENT_SECRET"] = client_secret
+    environ["SPOTIPY_CLIENT_ID"] = client_id
+    environ["SPOTIPY_CLIENT_SECRET"] = client_secret
 
 
 def clear_link(link):
@@ -89,3 +89,20 @@ def input_user(message, limit_response=[], check_is_dir=False):
                 break
     
     return result
+
+
+def get_output_directory():
+    """
+    Checa se existe um arquivo config.ini com a configuração
+    do caminho de saída e se não existir cria ele
+    """
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    
+    if not config.get('DEFAULT', 'output_directory', fallback=False):
+        with open('config.ini', 'w') as configfile:
+            response = input_user('Informe a pasta de saída', check_is_dir=True)
+            config['DEFAULT']['output_directory'] = response
+            config.write(configfile)
+
+    return config.get('DEFAULT', 'output_directory')

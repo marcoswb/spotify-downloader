@@ -4,6 +4,7 @@ from time import sleep
 from tempfile import TemporaryDirectory
 from shutil import copy
 from os import listdir
+from os.path import join
 
 from utils.functions import *
 from models.Playlist import Playlist
@@ -50,10 +51,10 @@ class Download():
 
     def move_output_folder(self, temp_directory):
         for directory in listdir(temp_directory):
-            full_path = os.path.join(temp_directory, directory)
+            full_path = join(temp_directory, directory)
             for file in listdir(full_path):
                 if file.endswith('.mp3'):
-                    path_file = os.path.join(full_path, file)
+                    path_file = join(full_path, file)
                     copy(path_file, self.__output_folder)
     
 
