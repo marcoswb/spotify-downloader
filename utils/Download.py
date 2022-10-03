@@ -33,7 +33,7 @@ class Download():
         Salvar a playlist na memória
         """
         if not self.exists():
-            playlist_id = Playlist.create(name=get_playlist_name(self.__link), link=self.__link)
+            playlist_id = Playlist.create(link=self.__link)
         else:
             result_query = Playlist.select().dicts().where(Playlist.link == self.__link)
             for line in result_query:
