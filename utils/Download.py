@@ -15,6 +15,8 @@ class Download():
         self.__link = clear_link(playlist_link)
         self.__output_folder = output_folder
         self.__all_tracks = []
+        self.__playlist_id = 0
+        self.__check_exists = self.exists()
 
         export_environment_variables()
         self.load_tracks()
@@ -46,10 +48,13 @@ class Download():
         """
         Checa se a playlist já foi baixada
         """
-        result = False
-        result_query = Playlist.select().where(Playlist.link == self.__link)
-        if result_query:
-            result = True
+        if self.__playlist_id:
+            result = self.__check_exists
+        else:
+            result = False
+            result_query = Playlist.select().where(Playlist.link == self.__link)
+            if result_query:
+                result = True
 
         return result
 
