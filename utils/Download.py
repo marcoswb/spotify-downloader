@@ -11,23 +11,25 @@ from models.Track import Track
 
 class Download():
 
-    def __init__(self, playlist_link, output_folder):
-        self.__link = clear_link(playlist_link)
+    def __init__(self, donwload_link, output_folder):
+        self.__link = clear_link(donwload_link)
         self.__output_folder = output_folder
         self.__all_tracks = []
+        self.__type = self.check_type()
         self.__playlist_id = 0
         self.__check_exists = self.exists()
 
         export_environment_variables()
         self.load_tracks()
-    
+
 
     def load_tracks(self):
         """
-        Buscar lista de musicas da playlist
+        Buscar lista de musicas da playlist ou album
         """
-        self.__all_tracks = get_link_tracks(self.__link)
-        self.__playlist_id = self.save_playlist()
+        self.__all_tracks = get_link_tracks(self.__link, self.__type)
+        if self.__type != 'track':
+            self.__playlist_id = self.save_playlist()
     
 
     def save_playlist(self):
@@ -48,13 +50,16 @@ class Download():
         """
         Checa se a playlist já foi baixada
         """
-        if self.__playlist_id:
-            result = self.__check_exists
-        else:
+        if self.__type == 'track':
             result = False
-            result_query = Playlist.select().where(Playlist.link == self.__link)
-            if result_query:
-                result = True
+        else:
+            if self.__playlist_id:
+                result = self.__check_exists
+            else:
+                result = False
+                result_query = Playlist.select().where(Playlist.link == self.__link)
+                if result_query:
+                    result = True
 
         return result
 
@@ -63,7 +68,10 @@ class Download():
         """
         Checar se a playlist já foi baixada e está atualizada
         """
-        return self.number_tracks_to_download() == 0
+        if self.__type == 'track':
+            return False
+        else:
+            return self.number_tracks_to_download() == 0
     
 
     def number_tracks_to_download(self):
@@ -104,7 +112,9 @@ class Download():
 
             for index, future in enumerate(concurrent.futures.as_completed(futures)):
                 track_name, link_track = future.result()
-                self.save_track(self.__playlist_id, track_name, link_track)
+                if self.__playlist_id:
+                    self.save_track(self.__playlist_id, track_name, link_track)
+
                 yield index+1, total_tracks, track_name
 
         self.move_output_folder(temp_directory.name)
@@ -149,3 +159,13 @@ class Download():
                 if file.endswith('.mp3'):
                     path_file = join(full_path, file)
                     copy(path_file, self.__output_folder)
+    
+    
+    def check_type(self):
+        """
+        Checa se o link para baixar é referente a uma playlist, album ou musica aleatória
+        """
+        types = ['playlist', 'album', 'track']
+        for type in types:
+            if type in self.__link:
+                return type

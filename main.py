@@ -6,19 +6,19 @@ class Main():
 
     def init(self):
         """
-        Perguntar link da playlist e iniciar download
+        Perguntar link da para donwload e iniciar download
         """
-        playlist_link = input_user('Informe o link da playlist')
+        donwload_link = input_user('Informe o link de uma musica, album ou playlist')
         output_folder = get_output_directory()
         
-        self.download(playlist_link, output_folder)
+        self.download(donwload_link, output_folder)
 
 
-    def download(self, playlist_link, output_folder):
+    def download(self, donwload_link, output_folder):
         """
         Realizar donwload das músicas
         """
-        self.worker = Download(playlist_link, output_folder)
+        self.worker = Download(donwload_link, output_folder)
         
         if self.worker.exists():
             response = input_user('Essa playlist já foi baixada uma vez, deseja somente atualizá-la? (S/N)', limit_response=['S', 'N'])
