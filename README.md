@@ -67,8 +67,8 @@ Com isso o projeto será criado com todas as dependências devidamente instalada
   - `SPOTIFY_CLIENT_ID` -> CLIENT_ID copiado do console do Spotify;
   - `SPOTIFY_CLIENT_SECRET` -> CLIENT_SECRET copiado do console do Spotify;
 4. Após isso deve-se exportar as variáveis de ambiente do shell, no Linux usamos os comandos:
-   5. export SPOTIPY_CLIENT_ID='your-spotify-client-id'
-   6. export SPOTIPY_CLIENT_SECRET='your-spotify-client-secret'
+   - `export SPOTIPY_CLIENT_ID='your-spotify-client-id`
+   - `export SPOTIPY_CLIENT_SECRET='your-spotify-client-secret`
 1. Após isso, é só executar o arquivo **main.py** e utilizar a ferramenta.
 
 ---
