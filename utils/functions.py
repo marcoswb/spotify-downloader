@@ -112,4 +112,4 @@ def clean_screen():
     """
     Limpar tela do terminal
     """
-    system('clear')
+    system('cls')

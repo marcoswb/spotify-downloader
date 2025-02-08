@@ -1,4 +1,4 @@
-from subprocess import run, DEVNULL
+from subprocess import run, DEVNULL, Popen, PIPE
 import concurrent.futures
 from tempfile import TemporaryDirectory
 from shutil import copy
@@ -97,7 +97,7 @@ class Download():
 
     def download_tracks(self):
         """
-        Realiza o donwload das musicas da playlist
+        Realiza o download das musicas da playlist
         """
         total_tracks = self.number_tracks_to_download()
         temp_directory = TemporaryDirectory()
@@ -137,7 +137,18 @@ class Download():
         """
         Executa via linha de comando a instrução para baixar uma musica
         """
-        run([f"spotify_dl -l '{link}' -o {output_folder}"], shell=True, stdout=DEVNULL)
+        process = Popen([
+                'spotify_dl',
+                '--url',
+                link,
+                '--output',
+                output_folder
+            ],
+            stdout=PIPE,
+            stderr=PIPE,
+            shell=True
+        )
+        process.communicate()
         return name_track, link
 
     
