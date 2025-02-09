@@ -1,3 +1,5 @@
-peewee==3.14.10
+peewee~=3.17.8
 spotify-dl==8.3.0
-spotipy==2.20.0
+spotipy==2.22.1
+python-dotenv~=1.0.1
+mutagen~=1.45.1

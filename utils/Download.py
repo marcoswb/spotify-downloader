@@ -5,9 +5,14 @@ from shutil import copy
 from os import listdir, mkdir
 from os.path import join, isdir
 
-from utils.functions import *
 from models.Playlist import Playlist
 from models.Track import Track
+from utils.functions import (
+    clear_link,
+    export_environment_variables,
+    get_link_tracks,
+    get_track_infos
+)
 
 class Download():
 
@@ -177,7 +182,9 @@ class Download():
             for file in listdir(full_path):
                 if file.endswith('.mp3'):
                     path_file = join(full_path, file)
-                    copy(path_file, self.__output_folder)
+                    tracks_info = get_track_infos(path_file)
+                    track_name = str(tracks_info.get("title")[0]).replace('/', '-')
+                    copy(path_file, f'{self.__output_folder}\\{track_name}.mp3')
     
     
     def check_type(self):

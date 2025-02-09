@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from os import getenv, environ, system
 from os.path import isdir
 import configparser
-
+from mutagen.easyid3 import EasyID3
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
@@ -133,3 +133,11 @@ def clean_screen():
     Limpar tela do terminal
     """
     system('cls')
+
+
+def get_track_infos(path_track):
+    """
+    Recupera informações de uma música
+    """
+    result = EasyID3(path_track)
+    return result
