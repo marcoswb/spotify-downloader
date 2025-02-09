@@ -81,7 +81,7 @@ def clear_link(link):
     return str(link)[:end_position]
 
 
-def input_user(message, limit_response=[], check_is_dir=False):
+def input_user(message, limit_response=[], check_is_dir=False, allow_empty=False):
     """
     Perguntar algo ao usuário
     """
@@ -90,6 +90,9 @@ def input_user(message, limit_response=[], check_is_dir=False):
         
         if not limit_response:
             if is_null(response):
+                if allow_empty:
+                    result = None
+                    break
                 print('Digite uma resposta válida!')
             else:
                 if check_is_dir:

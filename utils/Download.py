@@ -14,7 +14,7 @@ from utils.functions import (
     get_track_infos
 )
 
-class Download():
+class Download:
 
     def __init__(self, donwload_link, output_folder):
         self.__link = clear_link(donwload_link)
@@ -182,10 +182,13 @@ class Download():
             for file in listdir(full_path):
                 if file.endswith('.mp3'):
                     path_file = join(full_path, file)
-                    tracks_info = get_track_infos(path_file)
-                    track_name = str(tracks_info.get("title")[0]).replace('/', '-')
-                    copy(path_file, f'{self.__output_folder}\\{track_name}.mp3')
-    
+                    try:
+                        tracks_info = get_track_infos(path_file)
+                        track_name = str(tracks_info.get("title")[0]).replace('/', '-')
+                        copy(path_file, f'{self.__output_folder}\\{track_name}.mp3')
+                    except:
+                        copy(path_file, self.__output_folder)
+
     
     def check_type(self):
         """

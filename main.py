@@ -8,17 +8,28 @@ class Main():
         """
         Perguntar link da para donwload e iniciar download
         """
-        donwload_link = input_user('Informe o link de uma musica, album ou playlist')
+        downloads = []
+
+        download_link = input_user('Informe o link de uma musica, album ou playlist')
+        downloads.append(download_link)
+
+        while download_link:
+            download_link = input_user('Informe mais um link de uma musica, album ou playlist ou tecle ENTER para iniciar os downloads', allow_empty=True)
+            if download_link:
+                downloads.append(download_link)
+            else:
+                break
+
         output_folder = get_output_directory()
-        
-        self.download(donwload_link, output_folder)
+        for download_link in downloads:
+            self.download(download_link, output_folder)
 
 
-    def download(self, donwload_link, output_folder):
+    def download(self, download_link, output_folder):
         """
         Realizar donwload das músicas
         """
-        self.worker = Download(donwload_link, output_folder)
+        self.worker = Download(download_link, output_folder)
         
         if self.worker.exists():
             response = input_user('Essa playlist já foi baixada uma vez, deseja somente atualizá-la? (S/N)', limit_response=['S', 'N'])
