@@ -1,9 +1,9 @@
-from subprocess import run, DEVNULL, Popen, PIPE
+from subprocess import Popen, PIPE
 import concurrent.futures
 from tempfile import TemporaryDirectory
 from shutil import copy
-from os import listdir
-from os.path import join
+from os import listdir, mkdir
+from os.path import join, isdir
 
 from utils.functions import *
 from models.Playlist import Playlist
@@ -18,6 +18,7 @@ class Download():
         self.__type = self.check_type()
         self.__playlist_id = 0
         self.__check_exists = self.exists()
+        self.__playlist_name = None
 
         export_environment_variables()
         self.load_tracks()
@@ -27,7 +28,7 @@ class Download():
         """
         Buscar lista de musicas da playlist ou album
         """
-        self.__all_tracks = get_link_tracks(self.__link, self.__type)
+        self.__all_tracks, self.__playlist_name = get_link_tracks(self.__link, self.__type)
         if self.__type != 'track':
             self.__playlist_id = self.save_playlist()
     
@@ -36,12 +37,14 @@ class Download():
         """
         Salvar a playlist na memória
         """
+        playlist_id = None
+
         if not self.exists():
-            playlist_id = Playlist.create(link=self.__link)
-        else:
-            result_query = Playlist.select().dicts().where(Playlist.link == self.__link)
-            for line in result_query:
-                playlist_id = line.get('id')
+            Playlist.create(name=self.__playlist_name, link=self.__link)
+
+        result_query = Playlist.select().dicts().where(Playlist.link == self.__link)
+        for line in result_query:
+            playlist_id = line.get('id')
 
         return playlist_id
      
@@ -99,6 +102,11 @@ class Download():
         """
         Realiza o download das musicas da playlist
         """
+        if self.__playlist_name:
+            if not isdir(f'{self.__output_folder}\\{self.__playlist_name}'):
+                mkdir(f'{self.__output_folder}\\{self.__playlist_name}')
+                self.__output_folder = f'{self.__output_folder}\\{self.__playlist_name}'
+
         total_tracks = self.number_tracks_to_download()
         temp_directory = TemporaryDirectory()
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:

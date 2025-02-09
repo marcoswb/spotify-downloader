@@ -11,7 +11,7 @@ def is_null(value):
     return formated_value == ''
 
 
-def get_link_tracks(download_link, type):
+def get_link_tracks(download_link, type_register):
     load_dotenv()
 
     client_id = getenv('SPOTIFY_CLIENT_ID')
@@ -23,12 +23,14 @@ def get_link_tracks(download_link, type):
     ))
 
     all_tracks = []
-    if type == 'track':
+    name_playlist = None
+    if type_register == 'track':
         spotify_search = spotify_client.track(download_link)
         all_tracks.append({ 'name': spotify_search['name'], 'url': download_link })
     else:
-        if type == 'album':
+        if type_register == 'album':
             result = spotify_client.album_tracks(download_link)
+            name_playlist = spotify_client.album(download_link).get('name')
             tracks_infos = result.get('items')
 
             if result.get('next'):
@@ -39,7 +41,8 @@ def get_link_tracks(download_link, type):
                 name = track.get('name')
                 all_tracks.append({'url': url, 'name': name})
         else:
-            result = spotify_client.playlist_tracks(download_link)
+            result = spotify_client.playlist_items(download_link)
+            name_playlist = spotify_client.user_playlist(user=None, playlist_id=download_link, fields='name').get('name')
             tracks_infos = result.get('items')
 
             if result.get('next'):
@@ -50,7 +53,7 @@ def get_link_tracks(download_link, type):
                 name = track.get('track', {}).get('name')
                 all_tracks.append({'url': url, 'name': name})
 
-    return all_tracks
+    return all_tracks, name_playlist
 
 
 def get_next_results(spotify_client, result):
