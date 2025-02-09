@@ -1,5 +1,3 @@
-
-from venv import create
 from dotenv import load_dotenv
 from os import getenv, environ, system
 from os.path import isdir
@@ -30,19 +28,39 @@ def get_link_tracks(download_link, type):
         all_tracks.append({ 'name': spotify_search['name'], 'url': download_link })
     else:
         if type == 'album':
-            spotify_search = spotify_client.album_tracks(download_link)['items']
-            for track in spotify_search:
-                url = track['external_urls']['spotify']
-                name = track['name']
+            result = spotify_client.album_tracks(download_link)
+            tracks_infos = result.get('items')
+
+            if result.get('next'):
+                tracks_infos.extend(get_next_results(spotify_client, result))
+
+            for track in tracks_infos:
+                url = track.get('external_urls', {}).get('spotify')
+                name = track.get('name')
                 all_tracks.append({'url': url, 'name': name})
         else:
-            spotify_search = spotify_client.playlist_tracks(download_link)['items']
-            for track in spotify_search:
-                url = track['track']['external_urls']['spotify']
-                name = track['track']['name']
+            result = spotify_client.playlist_tracks(download_link)
+            tracks_infos = result.get('items')
+
+            if result.get('next'):
+                tracks_infos.extend(get_next_results(spotify_client, result))
+
+            for track in tracks_infos:
+                url = track.get('track', {}).get('external_urls', {}).get('spotify')
+                name = track.get('track', {}).get('name')
                 all_tracks.append({'url': url, 'name': name})
-        
+
     return all_tracks
+
+
+def get_next_results(spotify_client, result):
+    new_result = spotify_client.next(result)
+
+    all_results = new_result.get('items')
+    if new_result.get('next'):
+        all_results.extend(get_next_results(spotify_client, new_result))
+
+    return all_results
 
 
 def export_environment_variables():
@@ -64,7 +82,6 @@ def input_user(message, limit_response=[], check_is_dir=False):
     """
     Perguntar algo ao usuário
     """
-    result = ''
     while True:
         response = input(f'{message} => ')
         

@@ -22,7 +22,7 @@ class Main():
         
         if self.worker.exists():
             response = input_user('Essa playlist já foi baixada uma vez, deseja somente atualizá-la? (S/N)', limit_response=['S', 'N'])
-            
+
             if response == 'S':
                 if self.worker.is_updated():
                     print('Essa playlist já está atualizada!')
