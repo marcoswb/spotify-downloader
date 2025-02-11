@@ -81,7 +81,7 @@ def clear_link(link):
     return str(link)[:end_position]
 
 
-def input_user(message, limit_response=[], check_is_dir=False, allow_empty=False):
+def input_user(message, limit_response=None, check_is_dir=False, allow_empty=False):
     """
     Perguntar algo ao usuário
     """

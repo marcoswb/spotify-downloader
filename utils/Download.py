@@ -134,7 +134,8 @@ class Download:
         temp_directory.cleanup()
  
     
-    def exist_track(self, playlist_id, name, link):
+    @staticmethod
+    def exist_track(playlist_id, name, link):
         """
         Checa se a musica já foi baixada
         """
@@ -146,7 +147,8 @@ class Download:
         return result
 
 
-    def download(self, link, name_track, output_folder):
+    @staticmethod
+    def download(link, name_track, output_folder):
         """
         Executa via linha de comando a instrução para baixar uma musica
         """
@@ -165,7 +167,8 @@ class Download:
         return name_track, link
 
     
-    def save_track(self, playlist_id, name, link):
+    @staticmethod
+    def save_track(playlist_id, name, link):
         """
         Salvar musica na memória
         """
@@ -195,6 +198,6 @@ class Download:
         Checa se o link para baixar é referente a uma playlist, album ou musica aleatória
         """
         types = ['playlist', 'album', 'track']
-        for type in types:
-            if type in self.__link:
-                return type
+        for type_register in types:
+            if type_register in self.__link:
+                return type_register
