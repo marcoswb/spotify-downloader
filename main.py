@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 from utils.functions import *
 from utils.Download import Download
 from models.init_db import create_tables
@@ -43,6 +45,7 @@ class Main:
         Realizar donwload das músicas
         """
         worker = Download(download_link, output_folder)
+        playlist_name = worker.get_playlist_name()
         
         if worker.exists():
             if self.__update_playlists is None:
@@ -54,13 +57,16 @@ class Main:
 
             if self.__update_playlists:
                 if worker.is_updated():
-                    name = worker.get_playlist_name()
-                    print(f'"{name}" já está atualizada!')
+                    print(f'"{playlist_name}" já está atualizada!')
             else:
                 worker.download_all()
 
+        progress_bar = None
         for index, total_tracks, track in worker.download_tracks():
-            print(f'{index}/{total_tracks} {track} - OK')
+            if not progress_bar:
+                progress_bar = tqdm(range(total_tracks), desc=playlist_name)
+
+            progress_bar.update(1)
 
 
 if __name__ == '__main__':
