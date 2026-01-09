@@ -201,3 +201,6 @@ class Download:
         for type_register in types:
             if type_register in self.__link:
                 return type_register
+
+    def get_playlist_name(self):
+        return self.__playlist_name

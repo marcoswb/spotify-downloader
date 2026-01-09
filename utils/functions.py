@@ -77,8 +77,11 @@ def export_environment_variables():
 
 
 def clear_link(link):
-    end_position = str(link).index('si=') -1
-    return str(link)[:end_position]
+    try:
+        end_position = str(link).index('si=') -1
+        return str(link)[:end_position]
+    except:
+        return str(link)
 
 
 def input_user(message, limit_response=None, check_is_dir=False, allow_empty=False):
