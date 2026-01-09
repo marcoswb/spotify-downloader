@@ -110,7 +110,8 @@ class Download:
         if self.__playlist_name:
             if not isdir(f'{self.__output_folder}\\{self.__playlist_name}'):
                 mkdir(f'{self.__output_folder}\\{self.__playlist_name}')
-                self.__output_folder = f'{self.__output_folder}\\{self.__playlist_name}'
+
+            self.__output_folder = f'{self.__output_folder}\\{self.__playlist_name}'
 
         total_tracks = self.number_tracks_to_download()
         temp_directory = TemporaryDirectory()
