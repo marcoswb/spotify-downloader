@@ -24,6 +24,7 @@ class Download:
         self.__playlist_id = 0
         self.__check_exists = self.exists()
         self.__playlist_name = None
+        self.__debug = False
 
         export_environment_variables()
         self.load_tracks()
@@ -148,8 +149,7 @@ class Download:
         return result
 
 
-    @staticmethod
-    def download(link, name_track, output_folder):
+    def download(self, link, name_track, output_folder):
         """
         Executa via linha de comando a instrução para baixar uma musica
         """
@@ -164,7 +164,11 @@ class Download:
             stderr=PIPE,
             shell=True
         )
-        process.communicate()
+        stdout, stderr = process.communicate()
+        if self.__debug:
+            print(stdout)
+            print(stderr)
+        
         return name_track, link
 
     
@@ -184,6 +188,10 @@ class Download:
         for directory in listdir(temp_directory):
             full_path = join(temp_directory, directory)
             for file in listdir(full_path):
+                
+                if self.__debug:
+                    print(file)
+                
                 if file.endswith('.mp3'):
                     path_file = join(full_path, file)
                     try:
