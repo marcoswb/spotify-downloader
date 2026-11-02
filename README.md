@@ -123,7 +123,3 @@ Album and playlist files are saved as:
 ## License
 
 Released under the MIT License. See [LICENSE](LICENSE).
-
-## Contact
-
-Marcos Warmling Berti — marcos_wb@outlook.com
