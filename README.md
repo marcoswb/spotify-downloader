@@ -1,83 +1,129 @@
 # Spotify Downloader
 
+Command-line tool that downloads Spotify tracks, albums, and playlists as MP3 files and, for albums and playlists, downloads only the tracks that are not already recorded locally.
 
-## Tópicos
+Streaming covers day-to-day listening. This project covers the other case: keeping a folder of MP3s in sync with albums and playlists without downloading the whole list again each time.
 
-- [Spotify Downloader](#spotify-downloader)
-  - [Tópicos](#tópicos)
-  - [Sobre o Projeto](#sobre-o-projeto)
-  - [Tecnologias e Ferramentas utilizadas](#tecnologias-e-ferramentas-utilizadas)
-  - [Instalação](#instalação)
-  - [Execução](#execução)
-  - [Licença](#licença)
-  - [Contato](#contato)
+## Features
+
+- Accepts one or more Spotify track, album, or playlist links in a single run.
+- Saves album and playlist links in a local SQLite database (`memory.db`).
+- On a later run, compares the current Spotify listing with saved tracks and downloads only the ones that are missing.
+- Can refresh every album and playlist already stored in the database.
+- Downloads up to 10 tracks at a time and shows a progress bar for each album or playlist.
+- Writes files into a folder you choose. Albums and playlists each get a subfolder named after the Spotify title.
+- Names album and playlist files from the MP3 title tag. A `/` in the title is replaced with `-`.
+
+## Technologies
+
+- Python 3
+- [spotipy](https://spotipy.readthedocs.io/) (`spotipy==2.22.1`) for Spotify Web API metadata
+- [spotify-dl](https://pypi.org/project/spotify-dl/) (`spotify-dl==8.3.0`), invoked as the `spotify_dl` command, to produce the MP3 files
+- [Peewee](https://docs.peewee-orm.com/) (`peewee~=3.17.8`) and SQLite
+- [python-dotenv](https://pypi.org/project/python-dotenv/) (`python-dotenv~=1.0.1`)
+- [mutagen](https://mutagen.readthedocs.io/) (`mutagen~=1.45.1`) to read ID3 tags
+- [tqdm](https://tqdm.github.io/) for the progress bar
 
 
----
-## Sobre o Projeto
+## Project structure
 
-Esse projeto visa a criação de uma ferramenta simples para baixar suas músicas em formato .mp3 e manter elas atualizadas com albuns e playlists do Spotify.
+```text
+main.py                 Interactive menu and download loop
+utils/functions.py      Prompts, Spotify API calls, .env loading, config.ini
+utils/Download.py       Skip logic, parallel downloads, file copy
+models/Playlist.py      Saved album and playlist links
+models/Track.py         Tracks already recorded for those links
+models/init_db.py       Creates the SQLite tables on startup
+```
 
-O intuito da ferramenta era ser algo simples e que resolvesse um problema que eu enfrentava, que era o seguinte, eu particularmente gosto bastante de ouvir música e, além de ouvir por streaming pelo Spotify, queria ter elas disponíveis em formato .mp3 para conseguir transferir para um pendrive por exemplo e ter acesso a elas em outros dispositivos.
+Runtime files, created in the working directory and ignored by git:
 
-O download das musicas em si não era a tarefa mais difícil na verdade, há bastante ferramentas disponíveis que já fazem o download do Spotify para .mp3, porém a maior dificuldade era para atualizar as playlists, visto que toda vez que eu queria atualizar minhas musicas, precisava ou baixar toda a playlist novamente(o que as vezes podia demorar) ou saber exatamente quais musicas eu já tinha baixado antes e assim fazer o download manualmente só das que realmente eu precisava.
+| File | Purpose |
+| --- | --- |
+| `.env` | Spotify API credentials |
+| `config.ini` | Output folder |
+| `memory.db` | Albums, playlists, and tracks already recorded |
 
-E o objetivo dessa ferramenta é esse, é uma ferramenta de linha de comando para você baixar suas musicas, albuns ou playlists do Spotify, mas que consegue guardar, no caso de albuns e playlists, quais musicas você já baixou, e assim quando for baixar novamente a playlist, fazer o download só das músicas que você ainda não tem, de uma forma facilitada.
+## Prerequisites
 
----
-## Tecnologias e Ferramentas utilizadas
+- Python 3 and `pip`. This repository does not pin a minimum Python version.
+- A [Spotify application](https://developer.spotify.com/dashboard/applications) so you can copy its client ID and client secret. The app uses the client-credentials flow and does not sign in as a Spotify user.
+- The `spotify_dl` command on your `PATH`. Installing the requirements below provides it.
 
-- **Python** -> Linguagem base para a criação da ferramenta;
-- **Peewee** -> ORM destinado a criar e gerenciar tabelas de banco de dados relacionais através de objetos Python;
-- **SQLite** -> Banco de dados relacional e open source;
-- **Paralelismo** -> Utilizado algoritmo de processamento paralelo para otimizar o processo de download das músicas;
+Run the program from the project directory. `config.ini` and `memory.db` are opened with relative paths.
 
----
-## Instalação
-
-1. O processo é bem simples, basta copiar o projeto utilizando o comando:
+## Installation
 
 ```sh
 git clone https://github.com/marcoswb/spotify-downloader.git
-```
-
-2. Utilizar o comando a seguir para entrar dentro do projeto:
-  
-```sh
 cd spotify-downloader
-```
-
-3. Utilizar o comando a seguir para instalar as dependências Python:
-  
-```sh
 python -m pip install -r requirements.txt
 ```
 
-Com isso o projeto será criado com todas as dependências devidamente instaladas e linkadas.
+## Configuration
 
+Create a `.env` file in the project root:
 
----
-## Execução
+```text
+SPOTIFY_CLIENT_ID=your-client-id
+SPOTIFY_CLIENT_SECRET=your-client-secret
+```
 
-1. Faça login no [console de desenvolvedor do Spotify](https://developer.spotify.com/dashboard/applications) e crie um novo app.
+On startup the program copies those values to `SPOTIPY_CLIENT_ID` and `SPOTIPY_CLIENT_SECRET` for `spotipy` and `spotify_dl`. You do not need to export those names yourself when `.env` is present.
 
-1. Após criar o app, você deve ter acesso as credenciais de CLIENT_ID e CLIENT_SECRET.
-   
-1. Com essas variáveis em mãos, crie um arquivo **.env** na raíz do projeto e dentro dele informe as seguintes variáveis de ambiente:  
-  - `SPOTIFY_CLIENT_ID` -> CLIENT_ID copiado do console do Spotify;
-  - `SPOTIFY_CLIENT_SECRET` -> CLIENT_SECRET copiado do console do Spotify;
-4. Após isso deve-se exportar as variáveis de ambiente do shell, no Linux usamos os comandos:
-   - `export SPOTIPY_CLIENT_ID='your-spotify-client-id`
-   - `export SPOTIPY_CLIENT_SECRET='your-spotify-client-secret`
-1. Após isso, é só executar o arquivo **main.py** e utilizar a ferramenta.
+The first run asks for an output folder. The folder must already exist. The answer is stored in `config.ini`:
 
----
-## Licença
+```ini
+[DEFAULT]
+output_directory = C:\Music
+```
 
-Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
+Later runs reuse that path. To change it, edit `output_directory` or delete `config.ini` and answer the prompt again.
 
+## Usage
 
----
-## Contato
+```sh
+python main.py
+```
 
-Marcos Warmling Berti - **marcos_wb@outlook.com**
+The menu is in Portuguese:
+
+1. **Atualizar todas as playlists** — reload every album and playlist link stored in `memory.db` and download tracks that are not recorded yet.
+2. **Baixar novas playlists** — enter one or more links, then press Enter on an empty line to start.
+
+Example links:
+
+```text
+https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh
+https://open.spotify.com/album/1DFixLWuPkv3KT3TnV35m3
+https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M
+```
+
+A share link that contains `si=` is trimmed before it is stored.
+
+If an album or playlist is already in the database and you did not choose option 1, the program asks:
+
+```text
+Essa playlist já foi baixada uma vez, deseja somente atualizá-la? (S/N)
+```
+
+- **S** downloads tracks that are not in the database. If nothing is missing, it prints that the playlist is already up to date.
+- **N** deletes the saved track rows for that playlist and downloads its tracks again. Files already in the output folder are not deleted. A new file can overwrite an existing MP3 with the same title.
+
+The same answer is reused for every further album or playlist in that run.
+
+Single tracks are not written to the database. Each request downloads the track again, directly into the output folder rather than a subfolder.
+
+Album and playlist files are saved as:
+
+```text
+<output folder>\<album or playlist name>\<title>.mp3
+```
+
+## License
+
+Released under the MIT License. See [LICENSE](LICENSE).
+
+## Contact
+
+Marcos Warmling Berti — marcos_wb@outlook.com
